@@ -20,7 +20,7 @@ const showTrackList = (data) => {
     html = data
       .slice(0, 10)
       .map(
-        ({ id, title, album, artist }) => `
+        ({ id, title, artist }) => `
     <div>
       <div class="single-result row align-items-center my-3 p-3">
         <div class="col-md-9">
@@ -51,6 +51,10 @@ const fetchTrackList = async (url) => {
   showTrackList(data)
 }
 
+/**
+ * clear lyrics
+ * @param {string} id name of lyrics tag id
+ */
 const clearLyrics = (id) => {
   const lyricsTag = document.getElementById(id)
   lyricsTag.textContent = ''
@@ -59,6 +63,8 @@ const clearLyrics = (id) => {
 /**
  * Get data from give api link
  * @param {string} id id of the item
+ * @param {string} trackTitle title of the track
+ * @param {string} artistName name of the artist
  * @param {string} url api link
  */
 const fetchLyrics = async (id, tackTitle, artistName, url) => {
