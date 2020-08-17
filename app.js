@@ -21,14 +21,17 @@ const showTrackList = (data) => {
       .slice(0, 10)
       .map(
         ({ id, title, album, artist }) => `
-    <div id="${id}" class="single-result row align-items-center my-3 p-3">
-      <div class="col-md-9">
-          <h3 class="lyrics-name">${title}</h3>
-          <p class="author lead">Album by <span>${album.title}</span></p>
+    <div>
+      <div class="single-result row align-items-center my-3 p-3">
+        <div class="col-md-9">
+            <h3 class="lyrics-name">${title}</h3>
+            <p class="author lead">Album by <span>${album.title}</span></p>
+        </div>
+        <div class="col-md-3 text-md-right text-center">
+            <button onclick="fetchLyrics(${id}, '${BASE_URL}/v1/${artist.name}/${title}')" class="btn btn-success">Get Lyrics</button>
+        </div>
       </div>
-      <div class="col-md-3 text-md-right text-center">
-          <button onclick="fetchLyrics(${id}, '${BASE_URL}/v1/${artist.name}/${title}')" class="btn btn-success">Get Lyrics</button>
-      </div>
+      <div id="${id}" class="lyrics-content"></div>
     </div>
   `,
       )
@@ -43,8 +46,7 @@ const showTrackList = (data) => {
  * @param {string} url api link
  */
 const fetchTrackList = async (url) => {
-  const res = await (await fetch(url)).json()
-  const data = res.data
+  const { data } = await (await fetch(url)).json()
 
   showTrackList(data)
 }
@@ -56,18 +58,16 @@ const fetchTrackList = async (url) => {
  */
 const fetchLyrics = async (id, url) => {
   const { lyrics, error } = await (await fetch(url)).json()
-  const itemTag = document.getElementById(id)
+  const lyricsTag = document.getElementById(id)
+  const allLyricsTags = document.querySelectorAll('.lyrics-content')
+
+  // clear all lyrics content
+  allLyricsTags.forEach((tag) => (tag.textContent = ''))
 
   if (lyrics) {
-    itemTag.insertAdjacentHTML(
-      'afterend',
-      `<pre class="lyric text-white text-center">${lyrics}</pre>`,
-    )
+    lyricsTag.innerHTML = `<pre class="lyric text-white text-center">${lyrics}</pre>`
   } else {
-    itemTag.insertAdjacentHTML(
-      'afterend',
-      `<p class="text-danger text-center">${error}</p>`,
-    )
+    lyricsTag.innerHTML = `<p class="text-danger text-center">${error}</p>`
   }
 }
 
