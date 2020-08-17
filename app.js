@@ -20,15 +20,18 @@ const showTrackList = (data) => {
     html = data
       .slice(0, 10)
       .map(
-        ({ id, title, album, artist }) => `
-    <div id="${id}" class="single-result row align-items-center my-3 p-3">
-      <div class="col-md-9">
-          <h3 class="lyrics-name">${title}</h3>
-          <p class="author lead">Album by <span>${album.title}</span></p>
+        ({ id, title, artist }) => `
+    <div>
+      <div class="single-result row align-items-center my-3 p-3">
+        <div class="col-md-9">
+            <h3 class="lyrics-name">${title}</h3>
+            <p class="author lead">Album by <span>${artist.name}</span></p>
+        </div>
+        <div class="col-md-3 text-md-right text-center">
+            <button onclick="fetchLyrics(${id}, '${title}', '${artist.name}', '${BASE_URL}/v1/${artist.name}/${title}')" class="btn btn-success">Get Lyrics</button>
+        </div>
       </div>
-      <div class="col-md-3 text-md-right text-center">
-          <button onclick="fetchLyrics(${id}, '${BASE_URL}/v1/${artist.name}/${title}')" class="btn btn-success">Get Lyrics</button>
-      </div>
+      <div id="${id}" class="single-lyrics text-center"></div>
     </div>
   `,
       )
@@ -43,31 +46,43 @@ const showTrackList = (data) => {
  * @param {string} url api link
  */
 const fetchTrackList = async (url) => {
-  const res = await (await fetch(url)).json()
-  const data = res.data
+  const { data } = await (await fetch(url)).json()
 
   showTrackList(data)
 }
 
 /**
+ * clear lyrics
+ * @param {string} id name of lyrics tag id
+ */
+const clearLyrics = (id) => {
+  const lyricsTag = document.getElementById(id)
+  lyricsTag.textContent = ''
+}
+
+/**
  * Get data from give api link
  * @param {string} id id of the item
+ * @param {string} trackTitle title of the track
+ * @param {string} artistName name of the artist
  * @param {string} url api link
  */
-const fetchLyrics = async (id, url) => {
+const fetchLyrics = async (id, tackTitle, artistName, url) => {
   const { lyrics, error } = await (await fetch(url)).json()
-  const itemTag = document.getElementById(id)
+  const lyricsTag = document.getElementById(id)
+  const allLyricsTags = document.querySelectorAll('.single-lyrics')
+
+  // clear all lyrics content
+  allLyricsTags.forEach((tag) => (tag.textContent = ''))
 
   if (lyrics) {
-    itemTag.insertAdjacentHTML(
-      'afterend',
-      `<pre class="lyric text-white text-center">${lyrics}</pre>`,
-    )
+    lyricsTag.innerHTML = `
+      <button class="btn go-back text-white bg-primary" onclick="clearLyrics(${id})">&lsaquo;</button>
+      <h2 class="text-success mb-4">${artistName} - ${tackTitle}</h2>
+      <pre class="lyric text-white">${lyrics}</pre>
+    `
   } else {
-    itemTag.insertAdjacentHTML(
-      'afterend',
-      `<p class="text-danger text-center">${error}</p>`,
-    )
+    lyricsTag.innerHTML = `<p class="text-danger">${error}</p>`
   }
 }
 
